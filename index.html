@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TodoList</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #1f2737;
+    --muted: #8b94a7;
+    --border: #e5e9f2;
+    --accent: #4f6bed;
+    --accent-strong: #3f58d8;
+    --danger: #e5484d;
+    --radius: 12px;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 64px 20px 40px;
+    background:
+      radial-gradient(1100px 500px at 50% -140px, #e7ecff 0%, rgba(231, 236, 255, 0) 65%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+      "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 580px;
+  }
+
+  .app-header {
+    margin: 0 4px 24px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 30px;
+    letter-spacing: -0.5px;
+  }
+
+  .app-subtitle {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .card {
+    padding: 24px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 18px 40px rgba(31, 39, 55, 0.08);
+  }
+
+  .add-form {
+    display: flex;
+    gap: 10px;
+  }
+
+  .new-task {
+    flex: 1;
+    min-width: 0;
+    height: 46px;
+    padding: 0 14px;
+    background: #fbfcfe;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  }
+
+  .new-task::placeholder {
+    color: #a8b0c0;
+  }
+
+  .new-task:focus {
+    outline: none;
+    background: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79, 107, 237, 0.15);
+  }
+
+  .add-button {
+    height: 46px;
+    padding: 0 22px;
+    background: var(--accent);
+    border: 0;
+    border-radius: var(--radius);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.06s;
+  }
+
+  .add-button:hover {
+    background: var(--accent-strong);
+  }
+
+  .add-button:active {
+    transform: translateY(1px);
+  }
+
+  .form-hint {
+    margin: 8px 2px 0;
+    color: var(--danger);
+    font-size: 13px;
+  }
+
+  .task-section {
+    margin-top: 26px;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .section-title {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  .count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 6px;
+    background: #eef1f8;
+    border-radius: 999px;
+    color: #6b7590;
+    font-size: 12px;
+  }
+
+  .task-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 11px 2px;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .task-item:last-child {
+    border-bottom: 0;
+  }
+
+  .task-toggle {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  .task-checkbox {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .checkbox-box {
+    position: relative;
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+    background: #fff;
+    border: 1.5px solid #c9d0de;
+    border-radius: 6px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .checkbox-box::after {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 2.5px;
+    width: 5px;
+    height: 10px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.12s ease-out;
+  }
+
+  .task-checkbox:checked + .checkbox-box {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .task-checkbox:checked + .checkbox-box::after {
+    transform: rotate(45deg) scale(1);
+  }
+
+  .task-checkbox:focus-visible + .checkbox-box {
+    box-shadow: 0 0 0 3px rgba(79, 107, 237, 0.22);
+  }
+
+  .task-text {
+    overflow-wrap: anywhere;
+    font-size: 15px;
+    line-height: 1.45;
+    transition: color 0.15s;
+  }
+
+  .task-item.is-done .task-text {
+    color: #a1a9ba;
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+  }
+
+  .delete-button {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    color: #c0c7d4;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .delete-button:hover {
+    background: #fdecec;
+    color: var(--danger);
+  }
+
+  .delete-button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .empty-state {
+    margin: 0;
+    padding: 18px;
+    background: #fbfcfe;
+    border: 1px dashed #dfe4ee;
+    border-radius: var(--radius);
+    color: #a3abbc;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .app-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 26px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  .clear-button {
+    height: 38px;
+    padding: 0 14px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: #5d6780;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+
+  .clear-button:hover:not(:disabled) {
+    background: #fff7f7;
+    border-color: #f3c1c2;
+    color: var(--danger);
+  }
+
+  .clear-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .storage-note {
+    color: #a3abbc;
+    font-size: 12px;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  @media (max-width: 520px) {
+    body {
+      padding: 32px 14px 28px;
+    }
+
+    .card {
+      padding: 18px;
+      border-radius: 16px;
+    }
+
+    h1 {
+      font-size: 26px;
+    }
+
+    .add-button {
+      padding: 0 16px;
+    }
+  }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="app-header">
+    <h1>TodoList</h1>
+    <p class="app-subtitle">添加、完成和整理你的待办事项</p>
+  </header>
+
+  <div class="card">
+    <form id="add-form" class="add-form" autocomplete="off">
+      <input id="new-task" class="new-task" type="text" placeholder="输入待办事项，按回车添加" aria-label="待办事项内容">
+      <button class="add-button" type="submit">添加</button>
+    </form>
+    <p id="form-hint" class="form-hint" role="status" hidden>请输入内容后再添加</p>
+
+    <section class="task-section" aria-labelledby="pending-heading">
+      <div class="section-head">
+        <h2 id="pending-heading" class="section-title">未完成</h2>
+        <span id="pending-count" class="count">0</span>
+      </div>
+      <ul id="pending-list" class="task-list"></ul>
+      <p id="pending-empty" class="empty-state">暂无待办，先添加一条吧</p>
+    </section>
+
+    <section class="task-section" aria-labelledby="done-heading">
+      <div class="section-head">
+        <h2 id="done-heading" class="section-title">已完成</h2>
+        <span id="done-count" class="count">0</span>
+      </div>
+      <ul id="done-list" class="task-list"></ul>
+      <p id="done-empty" class="empty-state">还没有完成的任务</p>
+    </section>
+
+    <footer class="app-footer">
+      <button id="clear-done" class="clear-button" type="button" disabled>清除已完成</button>
+      <span class="storage-note">数据仅保存在本浏览器</span>
+    </footer>
+  </div>
+</main>
+
+<script>
+  (function () {
+    'use strict';
+
+    var STORAGE_KEY = 'web-todolist.tasks.v1';
+
+    var form = document.getElementById('add-form');
+    var input = document.getElementById('new-task');
+    var hint = document.getElementById('form-hint');
+    var pendingList = document.getElementById('pending-list');
+    var doneList = document.getElementById('done-list');
+    var pendingCount = document.getElementById('pending-count');
+    var doneCount = document.getElementById('done-count');
+    var pendingEmpty = document.getElementById('pending-empty');
+    var doneEmpty = document.getElementById('done-empty');
+    var clearDoneButton = document.getElementById('clear-done');
+
+    var tasks = loadTasks();
+
+    function loadTasks() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return [];
+        }
+        var parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) {
+          return [];
+        }
+        return parsed
+          .filter(function (task) {
+            return task && typeof task.content === 'string' && task.content.trim() !== '';
+          })
+          .map(function (task, index) {
+            return {
+              id: typeof task.id === 'number' ? task.id : Date.now() + index,
+              content: task.content,
+              done: Boolean(task.done)
+            };
+          });
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveTasks() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      } catch (error) {
+        /* 存储不可用时（如隐私模式）忽略写入错误，页面仍可正常使用 */
+      }
+    }
+
+    function nextId() {
+      var id = Date.now();
+      while (tasks.some(function (task) { return task.id === id; })) {
+        id += 1;
+      }
+      return id;
+    }
+
+    function showHint(message) {
+      hint.textContent = message;
+      hint.hidden = false;
+    }
+
+    function hideHint() {
+      hint.hidden = true;
+    }
+
+    function createTaskItem(task) {
+      var item = document.createElement('li');
+      item.className = 'task-item' + (task.done ? ' is-done' : '');
+      item.dataset.id = String(task.id);
+
+      var label = document.createElement('label');
+      label.className = 'task-toggle';
+
+      var checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'task-checkbox';
+      checkbox.checked = task.done;
+      checkbox.setAttribute(
+        'aria-label',
+        (task.done ? '标记「' + task.content + '」为未完成' : '标记「' + task.content + '」为已完成')
+      );
+      checkbox.addEventListener('change', function () {
+        toggleTask(task.id, checkbox.checked);
+      });
+
+      var box = document.createElement('span');
+      box.className = 'checkbox-box';
+      box.setAttribute('aria-hidden', 'true');
+
+      var text = document.createElement('span');
+      text.className = 'task-text';
+      text.textContent = task.content;
+
+      label.append(checkbox, box, text);
+
+      var deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.className = 'delete-button';
+      deleteButton.setAttribute('aria-label', '删除「' + task.content + '」');
+      deleteButton.textContent = '×';
+      deleteButton.addEventListener('click', function () {
+        deleteTask(task.id);
+      });
+
+      item.append(label, deleteButton);
+      return item;
+    }
+
+    function render() {
+      var pending = tasks.filter(function (task) { return !task.done; });
+      var done = tasks.filter(function (task) { return task.done; });
+
+      pendingList.replaceChildren.apply(pendingList, pending.map(createTaskItem));
+      doneList.replaceChildren.apply(doneList, done.map(createTaskItem));
+
+      pendingCount.textContent = String(pending.length);
+      doneCount.textContent = String(done.length);
+      pendingEmpty.hidden = pending.length > 0;
+      doneEmpty.hidden = done.length > 0;
+      clearDoneButton.disabled = done.length === 0;
+    }
+
+    function addTask(content) {
+      tasks.push({ id: nextId(), content: content, done: false });
+      saveTasks();
+      render();
+    }
+
+    function toggleTask(id, done) {
+      var task = tasks.find(function (item) { return item.id === id; });
+      if (!task) {
+        return;
+      }
+      task.done = done;
+      saveTasks();
+      render();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(function (task) { return task.id !== id; });
+      saveTasks();
+      render();
+    }
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var content = input.value.trim();
+      if (!content) {
+        showHint('请输入内容后再添加');
+        input.focus();
+        return;
+      }
+      hideHint();
+      addTask(content);
+      input.value = '';
+      input.focus();
+    });
+
+    input.addEventListener('input', function () {
+      if (input.value.trim()) {
+        hideHint();
+      }
+    });
+
+    clearDoneButton.addEventListener('click', function () {
+      tasks = tasks.filter(function (task) { return !task.done; });
+      saveTasks();
+      render();
+    });
+
+    render();
+  })();
+</script>
+</body>
+</html>
